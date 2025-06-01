@@ -1,4 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Excel to JSON Converter
+
+A Next.js application that converts Excel files to JSON format with special handling for multi-sentence values.
+
+## Features
+
+- Upload Excel files via drag-and-drop or file selection
+- Parse Excel files with two columns (key-value format)
+- Split multi-sentence values into separate entries with suffixed keys
+- Preview the generated JSON
+- Copy JSON to clipboard
+- Download the generated JSON file
+
+## Technologies Used
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- xlsx (for Excel parsing)
+- react-dropzone (for drag-and-drop functionality)
 
 ## Getting Started
 
@@ -14,11 +33,41 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Drag and drop an Excel file onto the upload area, or click to select a file.
+2. The application will process the Excel file and display the JSON preview.
+3. You can copy the JSON to your clipboard or download it as a file.
+
+## Excel File Format
+
+The Excel file should have a table with two columns:
+- The first column contains the keys
+- The second column contains the values
+
+If a value contains multiple sentences (separated by periods, exclamation marks, or question marks), the application will split it into separate entries with suffixed keys (e.g., `key_1`, `key_2`, etc.).
+
+### Example
+
+#### Input Excel:
+
+| Key | Value |
+|-----|-------|
+| greeting | Hello! How are you? I'm fine. |
+| name | John Doe |
+
+#### Output JSON:
+
+```json
+{
+  "greeting_1": "Hello!",
+  "greeting_2": "How are you?",
+  "greeting_3": "I'm fine.",
+  "name": "John Doe"
+}
+```
 
 ## Learn More
 
