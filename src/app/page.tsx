@@ -16,7 +16,7 @@ export default function Home() {
       <header className="max-w-4xl mx-auto mb-12 text-center">
         <h1 className="text-3xl font-bold mb-2">Excel to JSON Converter</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Upload an Excel file to convert it to JSON format. Multi-sentence values will be split into separate entries.
+          Upload an Excel file to convert it to JSON format. All sheets will be processed, multi-sentence values will be split into separate entries, and duplicate values will be automatically filtered out.
         </p>
       </header>
 

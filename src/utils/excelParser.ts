@@ -20,54 +20,63 @@ export function splitIntoSentences(text: string): string[] {
 export async function parseExcelToJson(file: File): Promise<Record<string, string>> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: 'array' });
-        
-        // Assume the first sheet is the one we want
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Convert to JSON
-        const jsonData = XLSX.utils.sheet_to_json<[string, string]>(worksheet, { header: 1 });
-        
+
         // Process the data
         const result: Record<string, string> = {};
-        
-        jsonData.forEach(row => {
-          if (Array.isArray(row) && row.length >= 2) {
-            const key = String(row[0]).trim();
-            const value = String(row[1]).trim();
-            
-            if (key && value) {
-              // Check if the value contains multiple sentences
-              const sentences = splitIntoSentences(value);
-              
-              if (sentences.length <= 1) {
-                // Single sentence, just add it as is
-                result[key] = value;
-              } else {
-                // Multiple sentences, add each with a suffix
-                sentences.forEach((sentence, index) => {
-                  result[`${key}_${index + 1}`] = sentence;
-                });
+        const usedValues = new Set<string>(); // Track used values to prevent duplicates
+
+        // Process all sheets in the workbook
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+
+          // Convert to JSON
+          const jsonData = XLSX.utils.sheet_to_json<[string, string]>(worksheet, { header: 1 });
+
+          jsonData.forEach(row => {
+            if (Array.isArray(row) && row.length >= 2) {
+              const key = String(row[0]).trim();
+              const value = String(row[1]).trim();
+
+              if (key && value) {
+                // Check if the value contains multiple sentences
+                const sentences = splitIntoSentences(value);
+
+                if (sentences.length <= 1) {
+                  // Single sentence, just add it if not a duplicate
+                  if (!usedValues.has(value)) {
+                    result[key] = value;
+                    usedValues.add(value);
+                  }
+                } else {
+                  // Multiple sentences, add each with a suffix if not a duplicate
+                  sentences.forEach((sentence, index) => {
+                    if (!usedValues.has(sentence)) {
+                      const sentenceKey = `${key}_${index + 1}`;
+                      result[sentenceKey] = sentence;
+                      usedValues.add(sentence);
+                    }
+                  });
+                }
               }
             }
-          }
+          });
         });
-        
+
         resolve(result);
       } catch (error) {
         reject(error);
       }
     };
-    
+
     reader.onerror = (error) => {
       reject(error);
     };
-    
+
     reader.readAsArrayBuffer(file);
   });
 }
